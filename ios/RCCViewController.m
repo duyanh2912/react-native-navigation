@@ -426,6 +426,7 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
     // At the moment, this seems to be the only thing that gets the back button correctly
     [navButtonTextAttributes removeObjectForKey:NSForegroundColorAttributeName];
     [[UIBarButtonItem appearance] setTitleTextAttributes:navButtonTextAttributes forState:UIControlStateNormal];
+    [[UIBarButtonItem appearance] setTitleTextAttributes:navButtonTextAttributes forState:UIControlStateHighlighted];
   }
   
   NSString *navBarButtonColor = self.navigatorStyle[@"navBarButtonColor"];
