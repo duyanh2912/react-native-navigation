@@ -59,7 +59,20 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
   if (!self) return nil;
   self.delegate = self;
   
-  self.navigationBar.translucent = NO; // default
+  // MARK - Set navigation bar to translucent before init is complete, so it will work without black flashes when uses with showModal
+  NSNumber *navBarTransparent = navigatorStyle[@"navBarTransparent"];
+  BOOL navBarTransparentBool = navBarTransparent ? [navBarTransparent boolValue] : NO;
+
+  if (navBarTransparentBool) {
+    [self.navigationBar setBackgroundImage:[UIImage new]
+                             forBarMetrics:UIBarMetricsDefault];
+    self.navigationBar.shadowImage = [UIImage new];
+    self.navigationBar.translucent = YES;
+    
+  } else {
+    self.navigationBar.translucent = NO; // default
+  }
+  // END
   
   [self processTitleView:viewController
                    props:props
