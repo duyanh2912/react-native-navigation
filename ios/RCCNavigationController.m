@@ -260,6 +260,11 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
     }
     else
     {
+      if (self.viewControllers.count > 0)
+      {
+        [self.viewControllers.lastObject viewWillDisappear:animated];
+      }
+
       [self popToRootViewControllerAnimated:animated];
     }
     return;
