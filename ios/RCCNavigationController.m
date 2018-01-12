@@ -522,11 +522,10 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
   
-  // Do not attempt to block rendering if this is the first
-  // view controller. Not having a _queuedViewController signals
+  // Not having a _queuedViewController signals
   // we should block the navigation push until React Native
   // has completed its rendering on the root view.
-  if([self.viewControllers count] > 0 && _renderingViewController == nil) {
+  if(_renderingViewController == nil) {
     _rendering = YES;
     _transitioning = NO;
     _renderingViewController = @{ @"viewController": viewController, @"animated": @(animated) };
