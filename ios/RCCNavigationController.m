@@ -18,6 +18,8 @@
 @implementation RCCNavigationController
 {
   BOOL _transitioning;
+  BOOL _rendering;
+  NSDictionary *_renderingViewController;
   NSMutableArray *_queuedViewControllers;
 }
 
@@ -81,7 +83,28 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
 
   [self setRotation:props];
   
+  // Wait until react view is loaded to set _rendering to false
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(contentDidAppear:) name:RCTContentDidAppearNotification object:nil];
+  
   return self;
+}
+
+- (void)contentDidAppear:(NSNotification *)note{  
+  dispatch_async(dispatch_get_main_queue(), ^{
+    _rendering = NO;
+    if (_renderingViewController != nil) {
+      if (![[_renderingViewController[@"viewController"] view] isEqual: note.object]) {
+        return;
+      }
+      
+      RCCViewController* vc = _renderingViewController[@"viewController"];
+      BOOL animated = [_renderingViewController[@"animated"] boolValue];
+      
+      _transitioning = NO;
+      
+      [self pushViewController:vc animated:animated];
+    }
+  });
 }
 
 
@@ -498,6 +521,21 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
 
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
+  
+  // Do not attempt to block rendering if this is the first
+  // view controller. Not having a _queuedViewController signals
+  // we should block the navigation push until React Native
+  // has completed its rendering on the root view.
+  if([self.viewControllers count] > 0 && _renderingViewController == nil) {
+    _rendering = YES;
+    _transitioning = NO;
+    _renderingViewController = @{ @"viewController": viewController, @"animated": @(animated) };
+  }
+  
+  if (_rendering && _renderingViewController[@"viewController"] == viewController) {
+    return;
+  }
+  
   if(_transitioning)
   {
     NSDictionary *pushDetails =@{ @"viewController": viewController, @"animated": @(animated) };
@@ -507,6 +545,7 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
   }
   
   _transitioning = YES;
+  _renderingViewController = nil;
     
     // Use setViewControllers instead of push for compatibility with presented modal (e.g Facebook Account Kit)
     dispatch_async(dispatch_get_main_queue(), ^{
