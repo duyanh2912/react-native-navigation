@@ -548,7 +548,7 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
     
     // Use setViewControllers instead of push for compatibility with presented modal (e.g Facebook Account Kit)
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self setViewControllers: [[self childViewControllers] arrayByAddingObject:viewController] animated:([[self childViewControllers] count] != 0)];
+        [self setViewControllers: [[self childViewControllers] arrayByAddingObject:viewController] animated: animated];
         //    [super pushViewController:viewController animated:animated];
     });
 }
